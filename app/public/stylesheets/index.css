@@ -1,0 +1,33 @@
+form{
+    width: 220px;
+    height: 100px;
+    margin: 0 auto;
+    margin-top: 220px;
+}
+
+#username{
+    outline: none;
+}
+
+#passoword{
+    outline: none;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+.button{
+    float: left;
+}
+
+.login{
+    width: 80px;
+    margin-left: 1rem;
+    background: #0894ec;
+    color: white;
+}
+.register{
+    width: 80px;
+    margin-left: 1.2rem;
+    color:white;
+    background: #f6383a;
+}

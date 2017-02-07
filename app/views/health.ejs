@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>健康状态</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+    <link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm-extend.min.css">
+    <link rel="stylesheet" href="/stylesheets/home.css">
+</head>
+
+<body>
+    <div class="page-group">
+        <div class="page page-current">
+            <header class="bar bar-nav">
+                <a class="icon icon-left pull-left open-panel" href="/personalhealth/home"></a>
+                <h1 class="title">健康状态</h1>
+            </header>
+            <nav class="bar bar-tab">
+                <a class="tab-item external active" href="/personalhealth/home">
+                    <span class="icon icon-home"></span>
+                    <span class="tab-label">主页</span>
+                    <!--<span class="badge">2</span>-->
+                </a>
+                <a class="tab-item external" href="/personalhealth/other">
+                    <span class="icon icon-app"></span>
+                    <span class="tab-label">其他</span>
+                </a>
+                <a class="tab-item external" href="/personalhealth/settings">
+                    <span class="icon icon-settings"></span>
+                    <span class="tab-label">设置</span>
+                </a>
+            </nav>
+            <div class="content">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-content-inner">
+                            <div class="list-block">
+                                <ul>
+                                    <li class="item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title">用户名称</div>
+                                            <div class="item-after" id="thisName"></div>
+                                        </div>
+                                    </li>
+                                    <li class="item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title">性别</div>
+                                            <div class="item-after" id="sex"></div>
+                                        </div>
+                                    </li>
+                                    <li class="item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title">健康分数</div>
+                                            <div class="item-after" id="score"></div>
+                                        </div>
+                                    </li>
+                                    <li class="item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title">当前年龄</div>
+                                            <div class="item-after" id="thisAge"></div>
+                                        </div>
+                                    </li>
+                                    <li class="item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title">当前体重</div>
+                                            <div class="item-after" id="thisWeight"></div>
+                                        </div>
+                                    </li>
+                                    <li class="item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title">当前身高</div>
+                                            <div class="item-after" id="thisHeight"></div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-content-inner">
+                            <div class="list-block">
+                                <ul>
+                                    <li class="item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title" id="houn_say"></div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+    <script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+    <script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm-extend.min.js' charset='utf-8'></script>
+    <script>
+        $.getJSON('/personalhealth/api/user', function(data){
+                var userId=data.data.userId;
+                var username=data.data.username;
+                $(".username").text(username);
+            $.getJSON('/personalhealth/api/health/getScore',{userId:userId}, function(data){
+                if(data.data==null) {
+                    $("#score").text("待测");
+                    $("#houn_say").text("Houner：还没有数据呢，快去健康分析吧！");
+                }
+                else{
+                    $("#score").text(data.data[0].score+"分");
+                    $.post('/personalhealth/api/analysis/scoreToMsg',{score:data.data[0].score},function(data){
+                        $("#houn_say").text("Houner："+data.data);
+                    },'json');
+                }
+            }); 
+            $.getJSON('/personalhealth/api/body/getBody',{userId:userId},function(data){
+                 if(!data.data.length){
+                    $("#thisName").text("缺省");
+                    $("#thisHeight").text("待测");
+                    $("#thisWeight").text("待测");
+                    $("#thisAge").text("待输");                
+                    $("#sex").text("待输");
+                 }
+                 else{
+                    $("#thisName").text(data.data[0].name);
+                    $("#thisHeight").text(data.data[0].height+"cm");
+                    $("#thisWeight").text(data.data[0].weight+"kg");
+                    $("#thisAge").text(data.data[0].age);                
+                    $("#sex").text(data.data[0].sex);
+                }
+            });
+        });
+        $("#login_out").click(function(){
+            $.post('/personalhealth/api/login_out',function(data){
+                location.reload();
+            },'json');
+        });
+  </script>
+</body>
+
+</html>

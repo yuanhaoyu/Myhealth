@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>我的主页</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+    <link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm-extend.min.css">
+    <link rel="stylesheet" href="/stylesheets/home.css">
+</head>
+
+<body>
+    <div class="page-group">
+        <div class="page page-current">
+            <header class="bar bar-nav">
+                <a class="icon icon-me pull-left open-panel"></a>
+                <h1 class="title username"></h1>
+            </header>
+            <nav class="bar bar-tab">
+                <a class="tab-item external active">
+                    <span class="icon icon-home"></span>
+                    <span class="tab-label">主页</span>
+                    <!--<span class="badge">2</span>-->
+                </a>
+                <a class="tab-item external" href="/personalhealth/other">
+                    <span class="icon icon-app"></span>
+                    <span class="tab-label">其他</span>
+                </a>
+                <a class="tab-item external" href="/personalhealth/settings">
+                    <span class="icon icon-settings"></span>
+                    <span class="tab-label">设置</span>
+                </a>
+            </nav>
+            <div class="content">
+                <div class="content-padded">
+                    <div id="header" class="col-100">
+                        <ul>
+                            <li id="weekTime"></li>
+                            <li id="Logion"></li>
+                            <li id="date"></li>
+                        </ul>
+                    </div>
+                    <div id="health">
+                        <a class="link external" href="/personalhealth/health" data-no-cache="true">
+                            <ul>
+                                <li>健康状态</li>
+                                <li id="myHealth" class="content_title"></li>
+                            </ul>
+                        </a>
+                    </div>
+                    <div id="step">
+                        <a class="link external" href="/personalhealth/step" data-no-cache="true">
+                            <ul>
+                                <li>今日步数</li>
+                                <li id="myStep" class="content_title"></li>
+                            </ul>
+                        </a>
+                    </div>
+                    <!--<div id="task">
+                        <a class="link external" href="/personalhealth/task" data-no-cache="true">
+                        <ul>
+                            <li>当前任务</li>
+                            <li id="myTask" class="content_title"></li>
+                        </ul>
+                        </a>
+                    </div>-->
+                    <div id="todayWeight">
+                        <a class="link external" href="/personalhealth/edweight" data-no-cache="true">
+                        <ul>
+                            <li>每日体重</li>
+                            <li id="getTodayWeight" class="content_title"></li>
+                        </ul>
+                        </a>
+                    </div>
+                    <div id="sleep">
+                        <a class="link external" href="/personalhealth/sleep" data-no-cache="true">
+                        <ul>
+                            <li>睡眠监控</li>
+                            <li id="mySleep" class="content_title">查看每日的睡眠质量</li>
+                        </ul>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-left panel-reveal">
+            <div class="content-block">
+                <p id="side"></p>
+                <p>欢迎来到PersonalHealth</p>
+                <!-- Click on link with "close-panel" class will close panel -->
+                <p><a href="#" class="close-panel">关闭</a></p>
+            </div>
+        </div>
+    </div>
+    <script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+    <script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+    <script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm-extend.min.js' charset='utf-8'></script>
+    <script>
+        //$.showPreloader();
+        $.getJSON('/personalhealth/api/today/getLogion', function(data){
+                $("#Logion").text(data.data[0].content);
+        }); 
+        $.getJSON('/personalhealth/api/today/getDate', function(data){
+                $("#date").text(data.data);
+        }); 
+        $.getJSON('/personalhealth/api/today/getWeek', function(data){
+                $("#weekTime").text(data.data);
+        }); 
+        $.getJSON('/personalhealth/api/user', function(data){
+                var userId=data.data.userId;
+                var username=data.data.username;
+                $(".username").text(username);
+                $("#side").text("Hello:"+username);
+
+            $.getJSON('/personalhealth/api/health/getScore',{userId:userId}, function(data){
+                if(data.data==null) $("#myHealth").text("还没有录入健康数据");
+                else $("#myHealth").text("当前分数:"+data.data[0].score+"分");
+            }); 
+            $.getJSON('/personalhealth/api/step/getTodayStep',{userId:userId}, function(data){
+                if(data.data==null) $("#myStep").text("今天还没有步数哦");
+                else $("#myStep").text("当前步数:"+data.data+"步");
+            });
+            $.getJSON('/personalhealth/api/task/getTask',{userId:userId}, function(data){
+                if(data.data==null) $("#myTask").text("快来制定你的健康计划");
+                else $("#myTask").text(data.data);
+            });
+            $.getJSON('/personalhealth/api/edweight/getTodayWeight',{userId:userId}, function(data){
+                if(data.data==null) $("#getTodayWeight").text("今天还没有记录你的体重呢");
+                else $("#getTodayWeight").text("当前体重:"+data.data[0].weight+"kg");
+            }); 
+            // $.getJSON('/personalhealth/api/task/getTask',{userId:userId}, function(data){
+            //     if(data.data==null) {
+            //         $("#mySleep").text("Houner正在努力获取您的睡眠数据...");
+            //             // setTimeout(function () {
+            //             //     $.hidePreloader();
+            //             // }, 400);
+            //     }
+            //     else {
+            //         $("#mySleep").text(data.data);
+            //             // setTimeout(function () {
+            //             //     $.hidePreloader();
+            //             // }, 400);
+            //     }
+            // });  
+                      
+         });
+
+         
+  </script>
+</body>
+
+</html>

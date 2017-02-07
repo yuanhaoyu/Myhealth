@@ -1,0 +1,12 @@
+.week_step{
+    height: 18rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    padding-top: 0.15rem;
+}
+.houn_title{
+    display: none;
+}
+.card_send{
+    display: none;
+}

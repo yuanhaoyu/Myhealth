@@ -1,0 +1,33 @@
+a{
+    color:white;
+}
+#setBody{
+    font-size: 0.7rem;
+    height: 4.2rem;
+    line-height: 4rem;
+    border: 1px solid #D84315;
+    text-align: center;
+    border-radius: 6px;
+    background: #D84315;
+    color: white;
+}
+#asHealth{
+    font-size: 0.7rem;
+    height: 4.2rem;
+    line-height: 4rem;
+    border: 1px solid #303F9F;
+    text-align: center;
+    border-radius: 6px;
+    background: #303F9F;
+    color: white;
+}
+#connectUs{
+    font-size: 0.7rem;
+    height: 4.2rem;
+    line-height: 4rem;
+    border: 1px solid #6A1B9A;
+    text-align: center;
+    border-radius: 6px;
+    background: #6A1B9A;
+    color: white;
+}

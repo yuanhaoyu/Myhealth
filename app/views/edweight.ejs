@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>我的主页</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+    <link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm-extend.min.css">
+    <link rel="stylesheet" href="/stylesheets/edweight.css">
+</head>
+
+<body>
+    <div class="page-group">
+        <div class="page page-current">
+            <header class="bar bar-nav">
+                <a class="icon icon-left pull-left open-panel" href="/personalhealth/home"></a>
+                <h1 class="title">每日体重</h1>
+            </header>
+            <nav class="bar bar-tab">
+                <a class="tab-item external active" href="/personalhealth/home">
+                    <span class="icon icon-home"></span>
+                    <span class="tab-label">主页</span>
+                    <!--<span class="badge">2</span>-->
+                </a>
+                <a class="tab-item external" href="/personalhealth/other">
+                    <span class="icon icon-app"></span>
+                    <span class="tab-label">其他</span>
+                </a>
+                <a class="tab-item external" href="/personalhealth/settings">
+                    <span class="icon icon-settings"></span>
+                    <span class="tab-label">设置</span>
+                </a>
+            </nav>
+            <div class="content">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-content-inner">
+                            <p><strong>Houner：</strong>记录每日的体重，记录自己的健康状态哦</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card_ed">
+                    <div class="card-content">
+                        <div class="card-content-inner">
+                            <div id="main" class="col-100" style="height:350px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card_record">
+                    <div class="card-content">
+                        <div class="card-content-inner">
+                            <p><strong>记录今天的体重</strong><span class="go icon icon-right"></span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card_send">
+                    <div class="card-content">
+                        <div class="card-content-inner">
+                            <div class="list-block">
+                                <br>
+                                <ul>
+                                    <li>
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-form-email"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title label">今日体重：</div>
+                                                <div class="item-input">
+                                                    <input id="thisWeight" type="text" placeholder="Your Weight" maxlength="5">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <br>
+                            <br>
+                            <div class="content-block">
+                                <div class="row">
+                                    <div class="col-100" id="send"><a href="#" class="button button-big button-fill button-success">提交</a></div>
+                                </div>
+                            </div>
+                            <br>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+    <script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+    <script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm-extend.min.js' charset='utf-8'></script>
+    <script type='text/javascript' src='/javascripts/echarts.common.min.js'></script>
+    <script>
+        $(".card_record").click(function(){
+            $(".card_record").hide();
+            $(".card_ed").hide();
+            $(".card_send").show();
+        });
+        $.getJSON('/personalhealth/api/user', function(data){
+                var userId=data.data.userId;
+                var username=data.data.username;
+                $("#send").click(function(){
+                    var thisWeight=$("#thisWeight").val();
+                        $.post('/personalhealth/api/edweight/setTodayWeight',{userId:userId,weight:thisWeight},function(data){
+                            if(data.flag) $.toast("操作成功！");
+                        });
+                });
+
+            $.getJSON('/personalhealth/api/edweight/getWeekWeight',{userId:userId}, function(data){
+                    var date = new Date();
+                    var thisDay=parseInt(date.getDay());
+                    //console.log(thisDay);
+                    var data_val=[];
+                    var i=0;
+                    if(data.data==null){
+                       //console.log(1);
+                        data_val=[0,0,0,0,0,0,0];
+                    }
+                    else{
+                         if(thisDay==1){
+                           //console.log(2);
+                            data_val=[0,0,0,0,0,0,0];
+                        }
+                        else{
+
+                            for(var j=thisDay;j>=1;j--){
+
+                                if(data.data[i]==null){
+                                  //console.log(3);
+                                    data_val[j]=0;
+                                    i++;
+                                }
+                                else{
+                                  console.log(i);
+                                     data_val[j]=data.data[i].weight;
+                                     i++;
+                                }
+                            };
+                            if(thisDay<6){
+                                for(var k=thisDay;k<=6;k++){
+                                    data_val[k+1]=0;
+                                };
+                                //console.table(data_val);
+                            }
+                        }
+                    }
+                    //echarts
+                    var myChart = echarts.init(document.getElementById('main'));
+                    var xAxis_val=['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                    var data_val1=[0,0,0,0,0,0,0];
+                    var option = {
+                        backgroundColor:'#fff',
+                        grid:{
+                            left:0,
+                            top:'10%',
+                            bottom:0,
+                            right:10,
+                            containLabel:true
+                        },
+                        tooltip:{
+                            show:true,
+                            backgroundColor:'#fff',
+                            borderColor:'#c23531',
+                            borderWidth:1,
+                            textStyle:{
+                                color:'#3c3c3c',
+                                fontSize:13
+                            },
+                            formatter:'{b}:{c}',
+                            extraCssText:'box-shadow: 0 0 5px rgba(0, 0, 0, 0.3)'
+                        },
+                        legend:{
+                            right:0,
+                            top:0,
+                            data:['rate']
+                        },
+                        title: {
+                            text: '每日体重/(KG)'
+                        },
+                        xAxis: {
+                            data: xAxis_val,
+                            boundaryGap:false,
+                            axisLine:{
+                                show:false
+                            },
+                            axisTick:{
+                                show:false
+                            }
+                        },
+                        yAxis: {
+                            splitLine:{
+                                show:true,
+                                lineStyle:{
+                                    color:'#eee'
+                                }
+                            }
+                        },
+                        series: [
+                            {
+                                type: 'bar',
+                                name:'rate',
+                                tooltip:{
+                                    show:false
+                                },
+                                animation:false,
+                                barWidth:1,
+                                hoverAnimation:false,
+                                data:data_val,
+                                itemStyle:{
+                                    normal:{
+                                        color:'#c23531',
+                                        //opacity:0.49,
+                                        label:{
+                                            show:false
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                type: 'line',
+                                name:'rate',
+                                animation:false,
+                                symbol:'circle',
+                                symbolSize:6,
+                                tooltip:{
+                                    show:false
+                                },
+                                hoverAnimation:false,
+                                data:data_val1,
+                                itemStyle:{
+                                    normal:{
+                                        opacity:0.9,
+                                        label:{
+                                            show:false
+                                        }
+                                    }
+                                },
+                                lineStyle:{
+                                    normal:{
+                                        width:1,
+                                        color:'#c23531',
+                                        opacity:0.9
+                                    }
+                                }
+                            },
+                            {
+                                type: 'line',
+                                name:'rate',
+                                smooth:true,
+                                symbolSize:8,
+                                animation:false,
+                                hoverAnimation:false,
+                                data:data_val,
+                                itemStyle:{
+                                    normal:{
+                                        //opacity:0,
+                                        label:{
+                                            show:true,
+                                            position:'top',
+                                            textStyle:{
+                                                color:'#3c3c3c'
+                                            }
+                                        }
+                                    }
+                                },
+                                areaStyle:{
+                                    normal:{
+                                        color:'#c23531',
+                                        opacity:0.1
+                                    }
+                                }
+
+                            }
+                        ]
+                    };
+                    myChart.setOption(option);
+            });
+        });
+
+  </script>
+</body>
+
+</html>

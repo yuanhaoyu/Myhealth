@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>今日步数</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm.min.css">
+    <link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.6.2/css/sm-extend.min.css">
+    <link rel="stylesheet" href="/stylesheets/step.css">
+</head>
+
+<body>
+    <div class="page-group">
+        <div class="page page-current">
+            <header class="bar bar-nav">
+                <a class="icon icon-left pull-left open-panel" href="/personalhealth/home"></a>
+                <h1 class="title">今日步数</h1>
+            </header>
+            <nav class="bar bar-tab">
+                <a class="tab-item external active" href="/personalhealth/home">
+                    <span class="icon icon-home"></span>
+                    <span class="tab-label">主页</span>
+                    <!--<span class="badge">2</span>-->
+                </a>
+                <a class="tab-item external" href="/personalhealth/other">
+                    <span class="icon icon-app"></span>
+                    <span class="tab-label">其他</span>
+                </a>
+                <a class="tab-item external" href="/personalhealth/settings">
+                    <span class="icon icon-settings"></span>
+                    <span class="tab-label">设置</span>
+                </a>
+            </nav>
+            <div class="content">
+                <div class="card card_todayStep">
+                    <div class="card-content">
+                        <div class="card-content-inner">
+                            <h2 id="thisStep"></h2>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <span>2015/01/15</span>
+                        <span id="addStep">手动记录</span>
+                    </div>
+                </div>
+                <div class="card card_weekStep">
+                    <div class="card-content">
+                        <div class="week_step">
+                            <h3>一周数据</h3>
+                            <hr/>
+                            <div id="main" class="col-100" style="height:270px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card houn_title">
+                    <div class="card-content">
+                        <div class="card-content-inner">
+                            <div class="list-block">
+                                <ul>
+                                    <li class="item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title" id="houn_say"><strong>Houner：</strong>请输入今天走的步数吧！</div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card_send">
+                    <div class="card-content">
+                        <div class="card-content-inner">
+                            <div class="list-block">
+                                <br>
+                                <ul>
+                                    <li>
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-form-email"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title label"><strong>今日步数：</strong></div>
+                                                <div class="item-input">
+                                                    <input id="step" type="text" placeholder="Your Step" maxlength="6">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <br>
+                            <br>
+                            <div class="content-block">
+                                <div class="row">
+                                    <div class="col-100" id="send"><a href="#" class="button button-big button-fill">提交</a></div>
+                                </div>
+                            </div>
+                            <br>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+    <script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+    <script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm.min.js' charset='utf-8'></script>
+    <script type='text/javascript' src='//g.alicdn.com/msui/sm/0.6.2/js/sm-extend.min.js' charset='utf-8'></script>
+    <script type='text/javascript' src='/javascripts/echarts.common.min.js'></script>
+    <script>
+
+        $.getJSON('/personalhealth/api/user', function(data){
+                var userId=data.data.userId;
+                var username=data.data.username;
+                $.getJSON('/personalhealth/api/step/getTodayStep',{userId:userId},function(data){
+                    //console.log(data.data);
+                    if(data.data==null){
+                        $("#thisStep").text("今日还没有步行数据哦");
+                    }
+                    else{
+                        $("#thisStep").text("今日步数："+data.data);
+                    }
+                });
+                $("#send").click(function(){
+                    var thisStep=$("#step").val();
+                    $.post("/personalhealth/api/step/setStep",{userId:userId,step:thisStep},function(data){
+                        if(data.flag) $.toast("操作成功!");
+                        else $.toast("操作失败!");
+                    });
+                });
+                $("#addStep").click(function(){
+                    $(".card_todayStep").hide();
+                    $(".card_weekStep").hide();
+                    $(".houn_title").show();
+                    $(".card_send").show();
+                });
+                $.getJSON('/personalhealth/api/step/getWeekStep',{userId:userId},function(data){
+                    var date = new Date();
+                    var thisDay=parseInt(date.getDay());
+                    var data_val=[];
+                    var i=0;
+                    if(data.data==null){
+                        data_val=[0,0,0,0,0,0,0];
+                    }
+                    else{
+                         if(thisDay==1){
+                            data_val=[0,0,0,0,0,0,0];
+                        }
+                        else{
+                            for(var j=thisDay;j>=1;j--){
+                                if(data.data[i]==null){
+                                    data_val[j]=0;
+                                    i++;
+                                }
+                                else{
+                                     data_val[j]=data.data[i].step;
+                                     i++;
+                                }
+                            };
+                            if(thisDay<6){
+                                for(var k=thisDay;k<=6;k++){
+                                    data_val[k+1]=0;
+                                };
+                            }
+                        }
+                    }
+                    //echarts
+                    var myChart = echarts.init(document.getElementById('main'));
+                    var xAxis_val=['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                    var data_val1=[0,0,0,0,0,0,0];
+                    var option = {
+                                backgroundColor:'#293042',
+                                grid:{
+                                    left:10,
+                                    top:'10%',
+                                    bottom:20,
+                                    right:40,
+                                    containLabel:true
+                                },
+                                tooltip:{
+                                    show:true,
+                                    backgroundColor:'#384157',
+                                    borderColor:'#384157',
+                                    borderWidth:1,
+                                    formatter:'{b}:{c}',
+                                    extraCssText:'box-shadow: 0 0 5px rgba(0, 0, 0, 1)'
+                                },
+                                legend:{
+                                    right:0,
+                                    top:0,
+                                    data:['距离'],
+                                    textStyle:{
+                                        color :'#5c6076'
+                                    }
+                                },
+                                title: {
+                                    text: '',
+                                    x:'4.5%',
+                                    top: '1%',
+                                    textStyle:{
+                                    color :'#5c6076'
+                                    }
+                                },
+                                xAxis: {
+                                    data: xAxis_val,
+                                    boundaryGap:false,
+                                    axisLine:{
+                                        show:false
+                                    },
+                                    axisLabel: {
+                                        textStyle: {
+                                            color: '#5c6076'
+                                        }
+                                    },
+                                    axisTick:{
+                                        show:false
+                                    }
+                                },
+                                yAxis: {
+                                    ayisLine:{
+                                        show:false
+                                    },
+                                    axisLabel: {
+                                        textStyle: {
+                                            color: '#5c6076'
+                                        }
+                                    },
+                                    splitLine:{
+                                        show:true,
+                                        lineStyle:{
+                                            color:'#2e3547'
+                                        }
+                                    },
+                                    axisLine: {
+                                            lineStyle: {
+                                                color: '#384157'
+                                            }
+                                        }
+                                },
+
+                                series: [
+                                    {
+                                        type: 'bar',
+                                        name:'linedemo',
+
+
+                                        tooltip:{
+                                            show:false
+                                        },
+                                        animation:false,
+                                        barWidth:1.4,
+                                        hoverAnimation:false,
+                                        data:data_val,
+                                        itemStyle:{
+                                            normal:{
+                                                color:'#f17a52',
+                                                opacity:0.6,
+                                                label:{
+                                                    show:false
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        type: 'line',
+                                        name:'距离',
+
+                                        animation:false,
+                                        symbol:'circle',
+
+                                        hoverAnimation:false,
+                                        data:data_val1,
+                                        itemStyle:{
+                                            normal:{
+                                                color:'#f17a52',
+                                                opacity:0,
+                                            }
+                                        },
+                                        lineStyle:{
+                                            normal:{
+                                                width:1,
+                                                color:'#384157',
+                                                opacity:1
+                                            }
+                                        }
+                                    },
+                                    {
+                                        type: 'line',
+                                        name:'linedemo',
+                                        smooth:true,
+                                        symbolSize:10,
+                                        animation:false,
+                                        lineWidth:1.2,
+                                        hoverAnimation:false,
+                                        data:data_val,
+                                        symbol:'circle',
+                                        itemStyle:{
+                                            normal:{
+                                                color:'#f17a52',
+                                                shadowBlur: 40,
+                                                label:{
+                                                    show:true,
+                                                    position:'top',
+                                                    textStyle:{
+                                                        color:'#f17a52',
+
+                                                    }
+                                                }
+                                            }
+                                        },
+                                    areaStyle:{
+                                            normal:{
+                                                color:'#f17a52',
+                                                opacity:0.08
+                                            }
+                                        }
+
+                                    }
+                                    ]
+                                };
+                                myChart.setOption(option);
+                            });
+                        });
+
+  </script>
+</body>
+
+</html>
