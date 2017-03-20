@@ -1,9 +1,15 @@
-# 练习用的小项目
+# Myhealth
 
-1.使用node的express开发
+**description：一款关注于个人健康的webApp**
 
-2.前后端分离 接口模式
+**Version:0.5**
 
-3.echart作图表显示
+**more:**
 
-4.整体UI使用SUI
+    1.使用node的express开发
+
+    2.前后端分离 接口模式
+
+    3.echart作图表显示
+
+    4.整体UI使用SUI
